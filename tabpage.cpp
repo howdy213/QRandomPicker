@@ -302,14 +302,14 @@ QStringList TabPage::pickNames(int count) {
                      m_namePicker->getRandomEngine());
         return tempList.mid(0, count);
     } else {
-        QStringList result;
+        QSet<QString> result;
         for (int i = 0; i < count; ++i) {
             QString name = m_namePicker->pickName();
             if (name.isEmpty())
                 break;
-            result.append(name);
+            result.insert(name);
         }
-        return result;
+        return QStringList(result.begin(),result.end());
     }
 }
 
