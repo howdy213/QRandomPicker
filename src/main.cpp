@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     //qputenv("QT_SCALE_FACTOR", "1.5");
     QApplication a(argc, argv);
-    a.setStyle(QStyleFactory::create("Fusion"));
+    //a.setStyle(QStyleFactory::create("Fusion"));
 
     MainWindow w;
     w.show();

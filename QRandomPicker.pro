@@ -8,13 +8,29 @@ win32 {
 }
 TARGET = QRandomPicker
 
-SOURCES += main.cpp \
-           mainwindow.cpp \
-           tabpage.cpp \
-           namepicker.cpp \
-           newcopydialog.cpp
-HEADERS += mainwindow.h \
-           tabpage.h \
-           namepicker.h \
-           newcopydialog.h
+SOURCES += src/main.cpp \
+           src/mainwindow.cpp \
+           src/tabpage.cpp \
+           src/session.cpp \
+           src/sessionmanager.cpp \
+           src/newcopydialog.cpp \
+           src/nameeditor.cpp \
+           src/historydialog.cpp \
+           src/sessionpickerdialog.cpp \
+           src/miniwindow.cpp
+HEADERS += src/mainwindow.h \
+           src/tabpage.h \
+           src/session.h \
+           src/sessionmanager.h \
+           src/newcopydialog.h \
+           src/nameeditor.h \
+           src/historydialog.h \
+           src/sessionpickerdialog.h \
+           src/miniwindow.h
+FORMS += src/mainwindow.ui \
+         src/newcopydialog.ui
 
+RESOURCES += \
+    resource/resource.qrc
+
+RC_ICONS = "resource/QRandomPicker.ico"
