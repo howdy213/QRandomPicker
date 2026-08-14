@@ -9,6 +9,7 @@ class SessionManager;
 class Session;
 class TabPage;
 class MiniWindow;
+class FloatingBall;
 class QTabWidget;
 class QMenuBar;
 class QMenu;
@@ -21,6 +22,10 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
+
+    // 启动模式
+    void onStartMiniWindow();
+    void onStartFloatingBall();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -41,11 +46,15 @@ private slots:
     void onEditNames();
     void onTogglePickMode();
     void onResetFairMode();
-    void onShowHistory();      // 打开历史记录窗口
+    void onShowHistory();
     void onTogglePinned();
     // 视图菜单
     void onSwitchViewMode();
     void onAlwaysOnTopToggled(bool checked);
+    void onShowFloatingBall();
+    void onShowMiniWindow();
+    // 设置菜单
+    void onSetStartupMode();
     // 内部
     void onCloseTab(TabPage *page);
     void onSessionCreated(Session *session);
@@ -69,11 +78,17 @@ private:
     void updateActionsState();
     void showStatusMessage(const QString &msg, int timeout = 3000);
     void showMiniWindow(Session *session);
+    void showFloatingBall(Session *session);
+    Session *currentSession() const;
 
     SessionManager *m_sessionManager;
     QFileSystemWatcher *m_fileWatcher;
     QTabWidget *m_tabWidget;
     QLabel *m_lblStatus;
+
+    // 小窗/悬浮球
+    MiniWindow *m_miniWindow = nullptr;
+    FloatingBall *m_floatingBall = nullptr;
 
     // 文件菜单
     QAction *m_actNew;
@@ -100,7 +115,14 @@ private:
     QAction *m_actViewNormal;
     QAction *m_actViewAdvanced;
     QAction *m_actViewMini;
+    QAction *m_actViewFloating;
     QAction *m_actAlwaysOnTop;
+
+    // 设置菜单
+    QActionGroup *m_startupGroup;
+    QAction *m_actStartupMain;
+    QAction *m_actStartupMini;
+    QAction *m_actStartupFloating;
 };
 
 #endif // MAINWINDOW_H

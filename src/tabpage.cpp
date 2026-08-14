@@ -40,6 +40,7 @@ TabPage::TabPage(Session *session, QWidget *parent)
         connect(m_session, &Session::pickModeChanged, this, [this](PickMode mode) {
             m_btnToggleMode->setText(mode == PickMode::Random ? "随机" : "公平");
             updateNameListColors();
+            updateCountLabel();
             updateStatsPanel();
         });
         connect(m_session, &Session::viewModeChanged, this, [this](ViewMode mode) {
@@ -78,7 +79,7 @@ void TabPage::initUI() {
 
     auto *topRow = new QHBoxLayout();
     topRow->setContentsMargins(0, 0, 0, 0);
-    m_lblCount = new QLabel("当前人数：0", this);
+    m_lblCount = new QLabel("0/0", this);
     topRow->addWidget(m_lblCount);
     topRow->addStretch();
 
@@ -219,7 +220,7 @@ void TabPage::loadFromSession() {
 
     m_listNames->clear();
     m_listNames->addItems(m_session->names());
-    m_lblCount->setText(QString("当前人数：%1").arg(m_session->names().size()));
+    updateCountLabel();
 
     m_btnToggleMode->setText(m_session->pickMode() == PickMode::Random ? "随机" : "公平");
 
@@ -291,6 +292,18 @@ void TabPage::updateControlsState() {
     m_btnIncrease->setDisabled(pickCount >= count);
     m_btnBigIncrease->setDisabled(pickCount >= count);
     m_btnPick->setDisabled(count == 0);
+}
+
+void TabPage::updateCountLabel() {
+    if (!m_session)
+        return;
+    int total = m_session->names().size();
+    if (m_session->pickMode() == PickMode::Fair) {
+        int remaining = m_session->remainingFairCount();
+        m_lblCount->setText(QString("公平剩余 %1/%2").arg(remaining).arg(total));
+    } else {
+        m_lblCount->setText(QString("%1/%2").arg(total).arg(total));
+    }
 }
 
 void TabPage::updateNameListColors() {
@@ -397,7 +410,7 @@ void TabPage::syncNamesToSession() {
     for (int i = 0; i < m_listNames->count(); ++i)
         names.append(m_listNames->item(i)->text().trimmed());
     m_session->setNames(names);
-    m_lblCount->setText(QString("当前人数：%1").arg(names.size()));
+    updateCountLabel();
     updateNameListColors();
     updateControlsState();
     updateStatsPanel();
@@ -464,6 +477,7 @@ void TabPage::onPickClicked() {
     displayResult(picked);
 
     updateNameListColors();
+    updateCountLabel();
     updateHistoryPanel();
     updateStatsPanel();
     updateControlsState();
@@ -476,6 +490,7 @@ void TabPage::onToggleModeClicked() {
     m_session->setPickMode(newMode);
     m_btnToggleMode->setText(newMode == PickMode::Random ? "随机" : "公平");
     updateNameListColors();
+    updateCountLabel();
     updateStatsPanel();
 }
 

@@ -17,7 +17,9 @@ SOURCES += src/main.cpp \
            src/nameeditor.cpp \
            src/historydialog.cpp \
            src/sessionpickerdialog.cpp \
-           src/miniwindow.cpp
+           src/miniwindow.cpp \
+           src/pickpopup.cpp \
+           src/floatingball.cpp
 HEADERS += src/mainwindow.h \
            src/tabpage.h \
            src/session.h \
@@ -26,7 +28,9 @@ HEADERS += src/mainwindow.h \
            src/nameeditor.h \
            src/historydialog.h \
            src/sessionpickerdialog.h \
-           src/miniwindow.h
+           src/miniwindow.h \
+           src/pickpopup.h \
+           src/floatingball.h
 FORMS += src/mainwindow.ui \
          src/newcopydialog.ui
 

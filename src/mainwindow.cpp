@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "floatingball.h"
 #include "historydialog.h"
 #include "miniwindow.h"
 #include "newcopydialog.h"
@@ -22,6 +23,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QMessageBox>
+#include <QSettings>
 #include <QStatusBar>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -65,7 +67,17 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    m_sessionManager->saveAll();
+    if (m_tabWidget->count() > 0) {
+        int ret = QMessageBox::question(this, "关闭窗口",
+                                         "是否保存所有会话后关闭？\nYes 保存全部并关闭，No 直接关闭，Cancel 取消",
+                                         QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        if (ret == QMessageBox::Cancel) {
+            event->ignore();
+            return;
+        }
+        if (ret == QMessageBox::Yes)
+            m_sessionManager->saveAll();
+    }
     event->accept();
 }
 
@@ -238,13 +250,12 @@ void MainWindow::initMenu() {
     m_actViewMini = new QAction("小窗模式", this);
     m_actViewMini->setShortcut(QKeySequence("Ctrl+4"));
     menuView->addAction(m_actViewMini);
-    connect(m_actViewMini, &QAction::triggered, this, [this]() {
-        auto *page = currentTabPage();
-        if (page && page->session()) {
-            // 打开小窗对话框
-            showMiniWindow(page->session());
-        }
-    });
+    connect(m_actViewMini, &QAction::triggered, this, &MainWindow::onShowMiniWindow);
+
+    m_actViewFloating = new QAction("悬浮球模式", this);
+    m_actViewFloating->setShortcut(QKeySequence("Ctrl+5"));
+    menuView->addAction(m_actViewFloating);
+    connect(m_actViewFloating, &QAction::triggered, this, &MainWindow::onShowFloatingBall);
 
     menuView->addSeparator();
 
@@ -252,6 +263,41 @@ void MainWindow::initMenu() {
     m_actAlwaysOnTop->setCheckable(true);
     menuView->addAction(m_actAlwaysOnTop);
     connect(m_actAlwaysOnTop, &QAction::toggled, this, &MainWindow::onAlwaysOnTopToggled);
+
+    // === 设置菜单 ===
+    QMenu *menuSettings = new QMenu("设置", this);
+    menuBar->addMenu(menuSettings);
+
+    QMenu *submenuStartup = new QMenu("默认启动项", this);
+    menuSettings->addMenu(submenuStartup);
+
+    m_startupGroup = new QActionGroup(this);
+    m_startupGroup->setExclusive(true);
+
+    m_actStartupMain = new QAction("主界面", this);
+    m_actStartupMain->setCheckable(true);
+    m_actStartupMain->setActionGroup(m_startupGroup);
+    submenuStartup->addAction(m_actStartupMain);
+    connect(m_actStartupMain, &QAction::triggered, this, &MainWindow::onSetStartupMode);
+
+    m_actStartupMini = new QAction("小窗模式", this);
+    m_actStartupMini->setCheckable(true);
+    m_actStartupMini->setActionGroup(m_startupGroup);
+    submenuStartup->addAction(m_actStartupMini);
+    connect(m_actStartupMini, &QAction::triggered, this, &MainWindow::onSetStartupMode);
+
+    m_actStartupFloating = new QAction("悬浮球模式", this);
+    m_actStartupFloating->setCheckable(true);
+    m_actStartupFloating->setActionGroup(m_startupGroup);
+    submenuStartup->addAction(m_actStartupFloating);
+    connect(m_actStartupFloating, &QAction::triggered, this, &MainWindow::onSetStartupMode);
+
+    // 从 QSettings 加载启动项配置
+    QSettings settings;
+    int startup = settings.value("startupMode", 0).toInt();
+    if (startup == 1) m_actStartupMini->setChecked(true);
+    else if (startup == 2) m_actStartupFloating->setChecked(true);
+    else m_actStartupMain->setChecked(true);
 }
 
 // ============== 工具函数 ==============
@@ -693,6 +739,7 @@ void MainWindow::onResetFairMode() {
     if (!page || !page->session())
         return;
     page->session()->resetFairPick();
+    page->updateNameListColors();
     showStatusMessage("公平模式已重置");
 }
 
@@ -834,14 +881,100 @@ void MainWindow::onTabPageStatusMessage(const QString &msg) {
 
 void MainWindow::showMiniWindow(Session *session) {
     if (!session) return;
+
+    // 关闭悬浮球
+    if (m_floatingBall) {
+        m_floatingBall->close();
+        m_floatingBall->deleteLater();
+        m_floatingBall = nullptr;
+    }
+
+    // 关闭已有小窗
+    if (m_miniWindow) {
+        m_miniWindow->close();
+        m_miniWindow->deleteLater();
+        m_miniWindow = nullptr;
+    }
+
     hide();
-    auto *dlg = new MiniWindow(session);
-    dlg->setAttribute(Qt::WA_DeleteOnClose);
-    dlg->setParent(nullptr);
-    dlg->show();
-    connect(dlg, &QDialog::finished, this, [this](int) {
+    m_miniWindow = new MiniWindow(session);
+    m_miniWindow->setAttribute(Qt::WA_DeleteOnClose);
+    m_miniWindow->setParent(nullptr);
+    m_miniWindow->show();
+    connect(m_miniWindow, &QDialog::finished, this, [this](int) {
+        m_miniWindow = nullptr;
         show();
         raise();
         activateWindow();
     });
+}
+
+void MainWindow::showFloatingBall(Session *session) {
+    if (!session) return;
+
+    // 关闭小窗
+    if (m_miniWindow) {
+        m_miniWindow->close();
+        m_miniWindow->deleteLater();
+        m_miniWindow = nullptr;
+    }
+
+    // 关闭已有悬浮球
+    if (m_floatingBall) {
+        m_floatingBall->close();
+        m_floatingBall->deleteLater();
+        m_floatingBall = nullptr;
+    }
+
+    hide();
+    m_floatingBall = new FloatingBall(session);
+    m_floatingBall->setParent(nullptr);
+    m_floatingBall->show();
+    connect(m_floatingBall, &FloatingBall::returnToMain, this, [this]() {
+        m_floatingBall = nullptr;
+        show();
+        raise();
+        activateWindow();
+    });
+    connect(m_floatingBall, &QObject::destroyed, this, [this]() {
+        m_floatingBall = nullptr;
+        show();
+        raise();
+        activateWindow();
+    });
+}
+
+Session *MainWindow::currentSession() const {
+    auto *page = currentTabPage();
+    return page ? page->session() : nullptr;
+}
+
+void MainWindow::onShowMiniWindow() {
+    auto *s = currentSession();
+    if (s) showMiniWindow(s);
+}
+
+void MainWindow::onShowFloatingBall() {
+    auto *s = currentSession();
+    if (s) showFloatingBall(s);
+}
+
+void MainWindow::onStartMiniWindow() {
+    auto *s = currentSession();
+    if (s) showMiniWindow(s);
+}
+
+void MainWindow::onStartFloatingBall() {
+    auto *s = currentSession();
+    if (s) showFloatingBall(s);
+}
+
+void MainWindow::onSetStartupMode() {
+    int mode = 0;
+    if (m_actStartupMini->isChecked()) mode = 1;
+    else if (m_actStartupFloating->isChecked()) mode = 2;
+    QSettings settings;
+    settings.setValue("startupMode", mode);
+    QString modeName = mode == 0 ? "主界面" : (mode == 1 ? "小窗模式" : "悬浮球模式");
+    showStatusMessage(QString("默认启动项已设为：%1").arg(modeName));
 }

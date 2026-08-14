@@ -71,7 +71,7 @@ void Session::setPickMode(PickMode mode) {
     if (m_pickMode == mode)
         return;
     m_pickMode = mode;
-    m_pickedIndices.clear();
+    // 切换模式时保留公平模式记录，不清除 m_pickedIndices
     emit pickModeChanged(mode);
     touch();
 }

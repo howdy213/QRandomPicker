@@ -25,6 +25,7 @@ public:
     void setViewMode(ViewMode mode);
     void editNames();   // 打开名单编辑窗口
     void saveSession(); // 保存当前 session
+    void updateNameListColors();
 
 signals:
     void closeRequested(TabPage *);
@@ -46,10 +47,10 @@ private slots:
 private:
     void initUI();
     void applyViewMode(ViewMode mode);
-    void updateNameListColors();
     void updateHistoryPanel();
     void updateStatsPanel();
     void updateControlsState();
+    void updateCountLabel();
     void updateViewModeButtons();
     [[nodiscard]] QString buildResultHtml(const QStringList &names) const;
     void displayResult(const QStringList &names);
