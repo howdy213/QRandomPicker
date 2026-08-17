@@ -212,6 +212,17 @@ void TabPage::initUI() {
     connect(m_btnIncrease, &QPushButton::clicked, this, &TabPage::onIncreasePickCount);
     connect(m_btnBigIncrease, &QPushButton::clicked, this, &TabPage::onBigIncreasePickCount);
     connect(m_btnClearHistory, &QPushButton::clicked, this, &TabPage::onClearHistoryClicked);
+    connect(m_historyList, &QListWidget::itemClicked, this, [this](QListWidgetItem *item) {
+        if (m_session && m_session->viewMode() == ViewMode::Advanced) {
+            QString text = item->text();
+            int colonPos = text.indexOf(": ");
+            if (colonPos >= 0) {
+                QString namesStr = text.mid(colonPos + 2);
+                QStringList names = namesStr.split(", ");
+                displayResult(names);
+            }
+        }
+    });
 }
 
 void TabPage::loadFromSession() {
@@ -379,7 +390,7 @@ QString TabPage::buildResultHtml(const QStringList &names) const {
             int idx = i + j;
             if (idx < names.size()) {
                 html += QString("<td align='center' style='padding:2px 4px;'>%1</td>")
-                            .arg(names[idx].toHtmlEscaped());
+                .arg(names[idx].toHtmlEscaped());
             } else {
                 html += "<td></td>";
             }

@@ -233,7 +233,7 @@ QString MiniWindow::buildResultHtml(const QStringList &names) const {
             int idx = i + j;
             if (idx < names.size()) {
                 html += QString("<td align='center' style='padding:2px 4px;'>%1</td>")
-                            .arg(names[idx].toHtmlEscaped());
+                .arg(names[idx].toHtmlEscaped());
             } else {
                 html += "<td></td>";
             }

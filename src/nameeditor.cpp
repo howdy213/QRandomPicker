@@ -72,8 +72,8 @@ QStringList NameListEditor::names() const {
 
 void NameListEditor::onImportClicked() {
     QString path = QFileDialog::getOpenFileName(this, "选择名单文件",
-                                                 QString(),
-                                                 "文本文件 (*.txt);;所有文件 (*.*)");
+                                                QString(),
+                                                "文本文件 (*.txt);;所有文件 (*.*)");
     if (path.isEmpty())
         return;
     QFile file(path);

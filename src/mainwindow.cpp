@@ -69,8 +69,8 @@ MainWindow::~MainWindow() {
 void MainWindow::closeEvent(QCloseEvent *event) {
     if (m_tabWidget->count() > 0) {
         int ret = QMessageBox::question(this, "关闭窗口",
-                                         "是否保存所有会话后关闭？\nYes 保存全部并关闭，No 直接关闭，Cancel 取消",
-                                         QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+                                        "是否保存所有会话后关闭？\nYes 保存全部并关闭，No 直接关闭，Cancel 取消",
+                                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if (ret == QMessageBox::Cancel) {
             event->ignore();
             return;
@@ -598,9 +598,9 @@ void MainWindow::onCloseAllSessions() {
         return;
 
     int ret = QMessageBox::question(this, "关闭所有会话",
-                                     QString("是否保存并关闭所有 %1 个会话？\nYes 保存并关闭，No 不保存关闭，Cancel 取消")
-                                         .arg(m_tabWidget->count()),
-                                     QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+                                    QString("是否保存并关闭所有 %1 个会话？\nYes 保存并关闭，No 不保存关闭，Cancel 取消")
+                                        .arg(m_tabWidget->count()),
+                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
     if (ret == QMessageBox::Cancel)
         return;
 
@@ -626,13 +626,13 @@ void MainWindow::onDeleteSession() {
 
     bool ok;
     QString name = QInputDialog::getItem(this, "删除会话", "选择要删除的会话：",
-                                          names, 0, false, &ok);
+                                         names, 0, false, &ok);
     if (!ok || name.isEmpty())
         return;
 
     int ret = QMessageBox::question(this, "确认删除",
-                                     QString("确定要删除会话 \"%1\" 吗？\n此操作会同时删除磁盘上的文件，且不可恢复！").arg(name),
-                                     QMessageBox::Yes | QMessageBox::No);
+                                    QString("确定要删除会话 \"%1\" 吗？\n此操作会同时删除磁盘上的文件，且不可恢复！").arg(name),
+                                    QMessageBox::Yes | QMessageBox::No);
     if (ret != QMessageBox::Yes)
         return;
 
@@ -679,9 +679,9 @@ void MainWindow::onRefreshSessions() {
         }
         if (!names.isEmpty()) {
             int ret = QMessageBox::question(this, "检测到会话文件被删除",
-                                             QString("以下会话在磁盘上已被删除：\n  • %1\n\n"
-                                                     "是否同时关闭对应的标签页？").arg(names.join("\n  • ")),
-                                             QMessageBox::Yes | QMessageBox::No);
+                                            QString("以下会话在磁盘上已被删除：\n  • %1\n\n"
+                                                    "是否同时关闭对应的标签页？").arg(names.join("\n  • ")),
+                                            QMessageBox::Yes | QMessageBox::No);
             if (ret == QMessageBox::Yes) {
                 for (const QString &id : std::as_const(result.deletedIds)) {
                     if (auto *page = findTabPageById(id)) {
@@ -804,9 +804,9 @@ void MainWindow::onCloseTab(TabPage *page) {
         return;
     auto *session = page->session();
     int ret = QMessageBox::question(this, "关闭会话",
-                                     QString("是否保存并关闭会话 \"%1\"？\nYes 保存并关闭，No 仅关闭标签页，Cancel 取消")
-                                         .arg(session ? session->name() : ""),
-                                     QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+                                    QString("是否保存并关闭会话 \"%1\"？\nYes 保存并关闭，No 仅关闭标签页，Cancel 取消")
+                                        .arg(session ? session->name() : ""),
+                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
     if (ret == QMessageBox::Cancel)
         return;
     if (ret == QMessageBox::Yes && session)

@@ -94,9 +94,9 @@ void PickPopup::buildAndSize(const QStringList &names) {
             int idx = i + j;
             if (idx < names.size()) {
                 html += QString("<td align='center' width='%1' style='padding:%2px %3px;'>%4</td>")
-                            .arg(cellWidth)
-                            .arg(CELL_VPAD).arg(CELL_HPAD)
-                            .arg(names[idx].toHtmlEscaped());
+                .arg(cellWidth)
+                    .arg(CELL_VPAD).arg(CELL_HPAD)
+                    .arg(names[idx].toHtmlEscaped());
             } else {
                 html += QString("<td width='%1'>&nbsp;</td>").arg(cellWidth);
             }
